@@ -72,7 +72,7 @@ class ListenerThread(threading.Thread):
               play :Eb5
               sleep %s
             end
-            """ % duration)
+            """ % durataion)
 
     def run(self):
         print ("\n", threading.currentThread().getName(), self.receive_messages)
@@ -88,21 +88,14 @@ if __name__ == '__main__':
     jobQueue = Queue()
     listener = ListenerThread(jobQueue, args=(True,))
     listener.start()
-    command = input("\nPress Enter to continue...")
     
     value = 0
     oldValue = 0
     ser = serial.Serial('/dev/ttyUSB0',9600, timeout = 35)
     ser.flushInput()
     
-##    while (command != 'y'):
-##        if(is_numeric(command)):
-##            value = float(command)
-##            listener.play(value)
-##            command = input("\nPress Enter to continue...")
     counter = 0
     while True:
-##        ser.write("a".encode())
         value = int(ser.readline().decode())
         counter += 1
         if(value <= 0):
@@ -112,11 +105,6 @@ if __name__ == '__main__':
             listener.play(value)
             counter = 0
 	
-##    while (command != 'y'):
-##        if(is_numeric(command)):
-##            value = float(command)
-##            listener.play(value)
-##        command = input("\nPress Enter to continue...")
     stop()
     listener.queue.put(None)
     listener.stop()

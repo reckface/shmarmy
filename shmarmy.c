@@ -46,19 +46,22 @@ long pMilli = 0;
 
 
 void setup() 
-{  
-  Serial.begin(9600);
+{
   pinMode(FLEX_PIN, INPUT);
   pinMode(buzzer, OUTPUT);
+  analogWrite(buzzer, 255);
+  delay(500);
+  analogWrite(buzzer, 0);
   pulsate();
+  Serial.begin(9600);
 }
 
 void pulsate(){
   isPaused = false;
   for(int i = 0; i < 3; i++){      
-    analogWrite(buzzer, 255);
+    tone(buzzer, 1000, 200);
     delay(100);
-    analogWrite(buzzer, 0);
+    noTone(buzzer);
     delay(200);
   }
   isPaused = true;
@@ -69,7 +72,7 @@ void beep()
   if(isPaused)
     return;
   isPlaying = true;
-  tone(buzzer, 1200, 20);
+  tone(buzzer, 1000, 20);
   //noTone(buzzer);
 }
 
@@ -111,33 +114,29 @@ void Read()
 
   // Use the calculated resistance to estimate the sensor's
   // bend angle:
-  float angle = map(flexR, STRAIGHT_RESISTANCE, BEND_RESISTANCE, 0, 90.0);
+  float angle = map(flexR, STRAIGHT_RESISTANCE, BEND_RESISTANCE, 0, 100.0);
   isPaused = angle < 15;
-  Serial.println((int)angle);
-  analogWrite(ledPin,flexV);
-  Serial.flush();
   if(rCounter = 100)
     rCounter = 0;
- if (angle != oldAngle) {
-    // reset the debouncing timer
-    lastDebounceTime = millis();
-  }
   if (angle != Angle) {
       Angle = angle;
       // only toggle the LED if the new button state is HIGH
       // change tone
       Measure(angle);
     }
-  if ((millis() - lastDebounceTime) > debounceDelay) {
+  if ((millis() - lastDebounceTime) > debounceDelay && angle > 0) {
+    // Send it to py
+    Serial.println((int)angle);
+    analogWrite(ledPin,flexV);
+    // Serial.flush();
     // whatever the angle is at, it's been there for longer than the debounce
     // delay, so take it as the actual current state:
     // if the button state has changed:
-//    if (angle != Angle) {
-//      Angle = angle;
-//      // only toggle the LED if the new button state is HIGH
-//      // change tone
-//      Measure(angle);
-//    }
+
+     if (angle != oldAngle) {
+        // reset the debouncing timer
+        lastDebounceTime = millis();
+      }
   }
 
   // save the angle. Next time through the loop, it'll be the oldAngle:
@@ -154,13 +153,14 @@ void Measure(float angle)
   {
     pulse = 5;
     duration = 2000;
-    tone(buzzer, 1200, 1000);
+    tone(buzzer, 1200, 10
+    000);
     isMax =  true;
   }
   else{    
     isMax =  false;
     if(angle > 80){
-      pulse = 10;
+      pulse = 100;
     }
     else if(angle > 70){
       pulse = 200;
